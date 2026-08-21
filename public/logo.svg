@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Beach Umbrella logo: striped parasol + sun lounger + sun + sand -->
+
+  <!-- sun -->
+  <g stroke="#0b3b5c" stroke-width="9" stroke-linecap="round">
+    <line x1="430" y1="18" x2="430" y2="36"/>
+    <line x1="430" y1="140" x2="430" y2="158"/>
+    <line x1="360" y1="88" x2="378" y2="88"/>
+    <line x1="482" y1="88" x2="500" y2="88"/>
+    <line x1="381" y1="39" x2="394" y2="52"/>
+    <line x1="466" y1="124" x2="479" y2="137"/>
+    <line x1="479" y1="39" x2="466" y2="52"/>
+    <line x1="394" y1="124" x2="381" y2="137"/>
+  </g>
+  <circle cx="430" cy="88" r="40" fill="#ffc531" stroke="#0b3b5c" stroke-width="10"/>
+
+  <!-- sand dune -->
+  <path d="M -8 452 Q 90 414 200 440 T 420 442 T 524 436 L 524 520 L -8 520 Z"
+        fill="#f8d99a" stroke="#0b3b5c" stroke-width="9"/>
+
+  <!-- sun lounger -->
+  <g>
+    <!-- legs -->
+    <g stroke="#0b3b5c" stroke-width="13" stroke-linecap="round">
+      <line x1="292" y1="330" x2="275" y2="428"/>
+      <line x1="398" y1="330" x2="415" y2="428"/>
+    </g>
+    <!-- backrest, reclining away from the umbrella -->
+    <line x1="420" y1="317" x2="466" y2="252" stroke="#0b3b5c" stroke-width="40" stroke-linecap="round"/>
+    <line x1="420" y1="317" x2="464" y2="255" stroke="#1ba7c4" stroke-width="26" stroke-linecap="round"/>
+    <line x1="420" y1="317" x2="464" y2="255" stroke="#ffffff" stroke-width="26" stroke-linecap="butt" stroke-dasharray="13 17"/>
+    <!-- deck -->
+    <line x1="248" y1="318" x2="422" y2="318" stroke="#0b3b5c" stroke-width="40" stroke-linecap="round"/>
+    <line x1="252" y1="318" x2="420" y2="318" stroke="#1ba7c4" stroke-width="26" stroke-linecap="round"/>
+    <line x1="252" y1="318" x2="420" y2="318" stroke="#ffffff" stroke-width="26" stroke-linecap="butt" stroke-dasharray="13 17"/>
+  </g>
+
+  <!-- umbrella -->
+  <g transform="translate(178 296) rotate(-14)">
+    <!-- pole -->
+    <rect x="-7" y="-150" width="14" height="290" rx="7" fill="#0b3b5c"/>
+    <!-- canopy petals -->
+    <g stroke="#0b3b5c" stroke-width="10" stroke-linejoin="round">
+      <path d="M 0 -150 Q -82 -95 -150 0 A 30 24 0 0 0 -90 0 Q -49 -95 0 -150 Z" fill="#ff5d5d"/>
+      <path d="M 0 -150 Q -49 -95 -90 0 A 30 24 0 0 0 -30 0 Q -16 -95 0 -150 Z" fill="#fff4dd"/>
+      <path d="M 0 -150 Q -16 -95 -30 0 A 30 24 0 0 0 30 0 Q 16 -95 0 -150 Z" fill="#ff5d5d"/>
+      <path d="M 0 -150 Q 16 -95 30 0 A 30 24 0 0 0 90 0 Q 49 -95 0 -150 Z" fill="#fff4dd"/>
+      <path d="M 0 -150 Q 49 -95 90 0 A 30 24 0 0 0 150 0 Q 82 -95 0 -150 Z" fill="#ff5d5d"/>
+    </g>
+    <!-- finial -->
+    <circle cx="0" cy="-152" r="13" fill="#ffc531" stroke="#0b3b5c" stroke-width="8"/>
+  </g>
+</svg>
