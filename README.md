@@ -85,9 +85,10 @@ npm run icons      # regenerate PWA icons from public/logo.svg
 
 The app is built with base `/beach-umbrella/` and ships with a workflow
 ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)) that builds
-and publishes to GitHub Pages on every push to `main`.
-
-One-time setup: repository **Settings → Pages → Source: GitHub Actions**.
+the site and publishes `dist/` to the `gh-pages` branch on every push to
+`main`. Creating the `gh-pages` branch auto-enables GitHub Pages; if it ever
+needs to be set manually: **Settings → Pages → Deploy from a branch →
+`gh-pages` / root**.
 
 ## 🔒 Privacy
 
