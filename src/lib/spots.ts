@@ -216,6 +216,16 @@ const PHOTON_TAGS: Array<[string, SpotCategory]> = [
   ['leisure:water_park', 'water_park'],
 ]
 
+/**
+ * Photon returns the N nearest matches overall, so a resort-dense town (a row
+ * of beach clubs on one stretch of sand) would fill every slot and push the
+ * actual beaches out. Querying the groups separately gives each its own slots.
+ */
+const PHOTON_GROUPS: string[][] = [
+  ['natural:beach', 'natural:bay', 'leisure:swimming_area', 'leisure:bathing_place'],
+  ['leisure:beach_resort', 'leisure:water_park'],
+]
+
 interface PhotonFeature {
   geometry?: { coordinates?: [number, number] }
   properties?: {
@@ -227,7 +237,8 @@ interface PhotonFeature {
   }
 }
 
-async function fetchFromPhoton(
+async function fetchPhotonGroup(
+  tags: string[],
   lat: number,
   lon: number,
   radiusKm: number,
@@ -237,11 +248,11 @@ async function fetchFromPhoton(
   url.searchParams.set('lat', String(lat))
   url.searchParams.set('lon', String(lon))
   url.searchParams.set('radius', String(radiusKm))
-  url.searchParams.set('limit', '50')
+  url.searchParams.set('limit', '40')
   // Only 'default', 'en', 'de' and 'fr' are supported; 'default' keeps the
   // local OSM name, which is what people actually call the place.
   url.searchParams.set('lang', 'default')
-  for (const [tag] of PHOTON_TAGS) url.searchParams.append('osm_tag', tag)
+  for (const tag of tags) url.searchParams.append('osm_tag', tag)
 
   const timeout = AbortSignal.timeout(8000)
   const res = await fetch(url, { signal: signal ? AbortSignal.any([signal, timeout]) : timeout })
@@ -275,6 +286,32 @@ async function fetchFromPhoton(
     })
   }
 
+  return spots
+}
+
+async function fetchFromPhoton(
+  lat: number,
+  lon: number,
+  radiusKm: number,
+  signal?: AbortSignal,
+): Promise<SwimSpot[]> {
+  const groups = await Promise.allSettled(
+    PHOTON_GROUPS.map((tags) => fetchPhotonGroup(tags, lat, lon, radiusKm, signal)),
+  )
+  if (groups.every((g) => g.status === 'rejected')) {
+    throw (groups[0] as PromiseRejectedResult).reason
+  }
+
+  const seen = new Set<string>()
+  const spots: SwimSpot[] = []
+  for (const g of groups) {
+    if (g.status !== 'fulfilled') continue
+    for (const spot of g.value) {
+      if (seen.has(spot.id)) continue
+      seen.add(spot.id)
+      spots.push(spot)
+    }
+  }
   return spots.sort((a, b) => a.distanceKm - b.distanceKm)
 }
 
