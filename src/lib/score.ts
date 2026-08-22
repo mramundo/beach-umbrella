@@ -12,7 +12,8 @@ import type { BandId, HourPoint, ScoreBreakdown, ScoredHour, SwimWindow } from '
  *   calm sea (waves)   12%
  *   light wind          8%
  *
- * Thunderstorms cap the score near zero; hours after sunset are not scored.
+ * Thunderstorms cap the score near zero, a high UV index caps it by WHO band
+ * (see uvCap), and hours after sunset are not scored.
  */
 const WEIGHTS = {
   sun: 0.35,
@@ -121,6 +122,20 @@ export function rainScore(prob: number, amount: number): number {
   return s
 }
 
+/**
+ * Sun ceiling, on the WHO UV bands. This app is for people who do not want to
+ * burn, so a punishing sun caps the index no matter how perfect the sea is:
+ * without it, a flat warm sea on a cloudless day could still be sold as a
+ * "great time" at UV 7. The FAQ documents these ceilings — keep both in sync.
+ */
+function uvCap(uv: number): number {
+  if (uv >= 11) return 19 // extreme  -> "avoid"
+  if (uv >= 8) return 39 //  very high -> at best "not ideal"
+  if (uv >= 6) return 59 //  high      -> at best "decent"
+  if (uv >= 3) return 79 //  moderate  -> never "perfect dip"
+  return 100 //             low        -> no ceiling
+}
+
 /** WMO weather codes: thunderstorms are a hard no, heavy rain nearly so. */
 function weatherCodeCap(code: number): number {
   if (code >= 95) return 3 // thunderstorm
@@ -150,7 +165,7 @@ export function scoreHour(hour: HourPoint): ScoredHour {
     breakdown.waves * WEIGHTS.waves +
     breakdown.wind * WEIGHTS.wind
 
-  const score = Math.round(Math.min(weighted, weatherCodeCap(hour.code)))
+  const score = Math.round(Math.min(weighted, weatherCodeCap(hour.code), uvCap(hour.uv)))
   return { hour, score, band: bandFor(score), breakdown }
 }
 

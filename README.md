@@ -41,8 +41,11 @@ For every daylight hour, six ingredients are scored 0–100 and combined:
 | Calm sea (wave height) | 12% | flat |
 | Light wind | 8% | ≤ 8 km/h |
 
-Thunderstorms cap the score near zero regardless of the rest; hours after
-sunset are not scored. *Best swim windows* are the contiguous daylight hours
+Two ceilings then apply on top: thunderstorms cap the score near zero, and
+the UV index caps it on the WHO scale (moderate 3–5 → max 79, high 6–7 → max 59,
+very high 8–10 → max 39, extreme 11+ → max 19), so a punishing sun is never
+sold as a good swim however perfect the sea is. Hours after sunset are not
+scored. *Best swim windows* are the contiguous daylight hours
 with the highest index. The Open-Meteo hourly UV index already accounts for
 cloud cover — a genuinely overcast summer morning scores high, which is
 exactly the point.
