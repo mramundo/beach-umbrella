@@ -77,6 +77,7 @@ const en: Dict = {
   'spots.error':
     'The OpenStreetMap servers are busy right now and did not answer. Please try again in a minute.',
   'spots.partial': 'Some map sources did not answer — the list may be incomplete.',
+  'spots.refining': 'Quick results — completing the list…',
   'spots.expand': 'Search wider ({km} km)',
   'spots.showMore': 'Show more spots',
   'spots.checkHere': 'Conditions here',
@@ -111,7 +112,7 @@ const en: Dict = {
 
   'faq.q3': 'Where does the data come from?',
   'faq.a3':
-    'Everything comes from free and open sources: weather, UV and marine forecasts (waves, sea temperature) from Open-Meteo; place search from the Open-Meteo geocoding service; swimmable places from OpenStreetMap via the Overpass API; and reverse geocoding from BigDataCloud. No paid API is used, and no API key is required.',
+    'Everything comes from free and open sources: weather, UV and marine forecasts (waves, sea temperature) from Open-Meteo; place search from the Open-Meteo geocoding service; swimmable places from OpenStreetMap, read through Photon (a fast search index, used to fill the list in about a second) and the Overpass API (slower but complete, and the only one that can check access and no-swimming tags); reverse geocoding from BigDataCloud. No paid API is used, and no API key is required.',
 
   'faq.q4': 'Why does it usually suggest early morning or late afternoon?',
   'faq.a4':
@@ -224,6 +225,7 @@ const it: Dict = {
   'spots.error':
     'I server di OpenStreetMap sono occupati e non hanno risposto. Riprova tra un minuto.',
   'spots.partial': 'Alcune fonti della mappa non hanno risposto — l’elenco potrebbe essere incompleto.',
+  'spots.refining': 'Risultati rapidi — sto completando l’elenco…',
   'spots.expand': 'Allarga la ricerca ({km} km)',
   'spots.showMore': 'Mostra altri luoghi',
   'spots.checkHere': 'Condizioni qui',
@@ -258,7 +260,7 @@ const it: Dict = {
 
   'faq.q3': 'Da dove arrivano i dati?',
   'faq.a3':
-    'Tutto arriva da fonti gratuite e aperte: previsioni meteo, UV e marine (onde, temperatura del mare) da Open-Meteo; la ricerca delle località dal servizio di geocoding di Open-Meteo; i luoghi balneabili da OpenStreetMap tramite le API Overpass; il reverse geocoding da BigDataCloud. Nessuna API a pagamento e nessuna chiave richiesta.',
+    'Tutto arriva da fonti gratuite e aperte: previsioni meteo, UV e marine (onde, temperatura del mare) da Open-Meteo; la ricerca delle località dal servizio di geocoding di Open-Meteo; i luoghi balneabili da OpenStreetMap, letti tramite Photon (un indice di ricerca veloce, che riempie l’elenco in circa un secondo) e le API Overpass (più lente ma complete, e le uniche che possono verificare i tag di accesso e divieto di balneazione); il reverse geocoding da BigDataCloud. Nessuna API a pagamento e nessuna chiave richiesta.',
 
   'faq.q4': 'Perché suggerisce quasi sempre mattina presto o tardo pomeriggio?',
   'faq.a4':

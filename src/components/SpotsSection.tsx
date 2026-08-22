@@ -5,12 +5,13 @@ import {
   CATEGORY_EMOJI,
   DEFAULT_RADIUS_KM,
   WIDE_RADIUS_KM,
-  fetchSwimSpots,
+  loadSwimSpots,
   osmLink,
+  readCachedSpots,
+  writeCachedSpots,
 } from '../lib/spots'
 import { formatKm } from '../lib/format'
 import type { Place, SpotCategory, SwimSpot } from '../lib/types'
-import { LoadingBall } from './LoadingBall'
 
 interface Props {
   place: Place
@@ -28,6 +29,7 @@ export function SpotsSection({ place, onSelectPlace }: Props) {
   const [status, setStatus] = useState<Status>('loading')
   const [spots, setSpots] = useState<SwimSpot[]>([])
   const [partial, setPartial] = useState(false)
+  const [refining, setRefining] = useState(false)
   const [filter, setFilter] = useState<SpotCategory | 'all'>('all')
   const [limit, setLimit] = useState(PAGE)
   const [attempt, setAttempt] = useState(0)
@@ -36,17 +38,46 @@ export function SpotsSection({ place, onSelectPlace }: Props) {
 
   useEffect(() => {
     const controller = new AbortController()
-    setStatus('loading')
-    fetchSwimSpots(place.lat, place.lon, radiusKm, controller.signal)
+    setLimit(PAGE)
+
+    // A recent list for this place shows instantly; the fetch still refreshes it.
+    const cached = readCachedSpots(place.lat, place.lon, radiusKm)
+    if (cached && cached.length > 0) {
+      setSpots(cached)
+      setPartial(false)
+      setStatus('ready')
+    } else {
+      setSpots([])
+      setStatus('loading')
+    }
+
+    loadSwimSpots(place.lat, place.lon, radiusKm, {
+      signal: controller.signal,
+      // Photon answers in about a second — show it while Overpass finishes.
+      onPreview: (preview) => {
+        if (controller.signal.aborted) return
+        setSpots(preview)
+        setPartial(false)
+        setStatus('ready')
+        setRefining(true)
+      },
+    })
       .then((result) => {
+        if (controller.signal.aborted) return
         setSpots(result.spots)
         setPartial(result.partial)
         setStatus('ready')
-        setLimit(PAGE)
+        setRefining(false)
+        if (!result.partial && result.spots.length > 0) {
+          writeCachedSpots(place.lat, place.lon, radiusKm, result.spots)
+        }
       })
       .catch(() => {
-        if (!controller.signal.aborted) setStatus('error')
+        if (controller.signal.aborted) return
+        setRefining(false)
+        if (!cached?.length) setStatus('error')
       })
+
     return () => controller.abort()
   }, [place.lat, place.lon, radiusKm, attempt])
 
@@ -95,7 +126,7 @@ export function SpotsSection({ place, onSelectPlace }: Props) {
         </p>
       </div>
 
-      {status === 'loading' && <LoadingBall label={t('spots.loading')} />}
+      {status === 'loading' && <SpotsSkeleton label={t('spots.loading')} />}
 
       {status === 'error' && (
         <div className="mt-5 flex flex-wrap items-center gap-3">
@@ -127,7 +158,13 @@ export function SpotsSection({ place, onSelectPlace }: Props) {
 
       {status === 'ready' && spots.length > 0 && (
         <>
-          {partial && (
+          {refining && (
+            <p className="chip mt-4 inline-flex items-center gap-2 bg-sea-50 px-4 py-1.5 text-sm font-semibold">
+              <span className="h-2.5 w-2.5 shrink-0 animate-pulse rounded-full bg-sea-500" />
+              {t('spots.refining')}
+            </p>
+          )}
+          {partial && !refining && (
             <p className="chip mt-4 inline-block bg-sand-100 px-4 py-1.5 text-sm font-semibold">
               ⚠️ {t('spots.partial')}
             </p>
@@ -219,6 +256,35 @@ export function SpotsSection({ place, onSelectPlace }: Props) {
         </>
       )}
     </section>
+  )
+}
+
+/** Placeholder cards: the layout appears at once instead of a blank wait. */
+function SpotsSkeleton({ label }: { label: string }) {
+  return (
+    <div className="mt-6" role="status" aria-live="polite">
+      <p className="chip inline-flex items-center gap-2 bg-white px-4 py-1.5 text-sm font-semibold">
+        <span className="h-2.5 w-2.5 shrink-0 animate-pulse rounded-full bg-sea-500" />
+        {label}
+      </p>
+      <ul className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 6 }, (_, i) => (
+          <li key={i} className="card animate-pulse rounded-2xl p-4" style={{ animationDelay: `${i * 90}ms` }}>
+            <div className="flex items-start gap-3">
+              <div className="h-12 w-12 shrink-0 rounded-xl border-[3px] border-ink bg-sand-200" />
+              <div className="flex-1 space-y-2 pt-1">
+                <div className="h-4 w-3/4 rounded-full bg-sand-200" />
+                <div className="h-3 w-1/2 rounded-full bg-sand-100" />
+              </div>
+            </div>
+            <div className="mt-4 flex gap-2">
+              <div className="h-8 w-28 rounded-full border-[2.5px] border-ink bg-sand-100" />
+              <div className="h-8 w-20 rounded-full border-[2.5px] border-ink bg-sand-100" />
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }
 

@@ -67,6 +67,17 @@ export default defineConfig({
             },
           },
           {
+            // Fast swim-spot preview (Photon search index over OSM)
+            urlPattern: /^https:\/\/photon\.komoot\.io\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'photon',
+              networkTimeoutSeconds: 8,
+              expiration: { maxEntries: 30, maxAgeSeconds: 24 * 60 * 60 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
             // Reverse geocoding + IP country detection
             urlPattern: /^https:\/\/(api\.bigdatacloud\.net|ipwho\.is|ipapi\.co)\/.*/i,
             handler: 'NetworkFirst',

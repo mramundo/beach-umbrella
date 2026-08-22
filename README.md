@@ -20,7 +20,10 @@ everywhere else** (with a manual IT/EN toggle).
 - ⭐ **Best swim windows** per day, over a 7-day forecast
 - 🕐 **Live local clock** of the selected place
 - 🏖️ **Where to swim nearby** — swimmable places from OpenStreetMap, filterable
-  by category, each with distance, a map link and a one-tap "conditions here"
+  by category, each with distance, a map link and a one-tap "conditions here".
+  Loaded in two phases: Photon fills the list in about a second, then Overpass
+  replaces it with the tag-verified set (private and no-swimming places
+  excluded); results are cached locally for a day
 - ❓ **FAQ** explaining exactly how the index is computed
 - 📱 **Installable PWA** with offline caching of the app shell and last forecasts
 - 🎨 Bold summer design, fully responsive (desktop + mobile), reduced-motion aware
@@ -54,7 +57,8 @@ in the FAQ too — keep both in sync).
 | [Open-Meteo Forecast API](https://open-meteo.com/) | weather, UV, wind, rain, sunrise/sunset, timezone |
 | [Open-Meteo Marine API](https://open-meteo.com/) | wave height, sea surface temperature |
 | [Open-Meteo Geocoding API](https://open-meteo.com/) | place search (localized) |
-| [OpenStreetMap Overpass API](https://overpass-api.de/) | swimmable places nearby |
+| [Photon](https://photon.komoot.io/) (Komoot) | fast first list of swim spots (~1 s) |
+| [OpenStreetMap Overpass API](https://overpass-api.de/) | complete, tag-verified swim spots |
 | [BigDataCloud reverse geocoding](https://www.bigdatacloud.com/free-api/free-reverse-geocode-to-city-api) | naming your geolocated position |
 | [ipwho.is](https://ipwho.is/) / [ipapi.co](https://ipapi.co/) | country detection for the IT/EN language rule |
 

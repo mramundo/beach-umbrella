@@ -55,6 +55,8 @@ html {
 body {
   font-family: var(--font-sans);
   color: var(--color-ink);
+  /* Decorative tilted/offset elements must never scroll the page sideways. */
+  overflow-x: clip;
   background-color: var(--color-sand-100);
   background-image:
     radial-gradient(1100px 500px at 85% -100px, rgba(255, 197, 49, 0.35), transparent 65%),
@@ -306,6 +308,7 @@ body {
   .animate-bar,
   .animate-spin-slow,
   .animate-bounce-ball,
+  .animate-pulse,
   .animate-cloud,
   .animate-cloud-slow,
   .marquee-track,

@@ -162,11 +162,12 @@ async function runQuery(query: string, signal?: AbortSignal): Promise<OverpassEl
 
 export interface SpotsResult {
   spots: SwimSpot[]
-  /** true when one of the two queries failed and the list may be incomplete */
+  /** true when part of the data is missing, so the list may be incomplete */
   partial: boolean
 }
 
-export async function fetchSwimSpots(
+/** The authoritative source: full tags, so exclusions and categories are exact. */
+async function fetchFromOverpass(
   lat: number,
   lon: number,
   radiusKm: number,
@@ -191,6 +192,130 @@ export async function fetchSwimSpots(
   return {
     spots: normalize(elements, lat, lon, radiusKm),
     partial: coastal.status === 'rejected' || inland.status === 'rejected',
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Fast preview (Photon)
+ *
+ * Overpass is thorough but slow (seconds to tens of seconds). Photon is a
+ * search index over the same OSM data and answers in about a second, so it
+ * fills the list immediately while Overpass is still running.
+ *
+ * Photon returns no `access`/`swimming` tags, so we only ask it for tags that
+ * denote a bathing place or open coast. Pools (often private or hotel-only)
+ * and generic water bodies (reservoirs where swimming is usually banned) are
+ * left to Overpass, which can check those tags.
+ * ------------------------------------------------------------------ */
+const PHOTON_TAGS: Array<[string, SpotCategory]> = [
+  ['natural:beach', 'beach'],
+  ['natural:bay', 'cove'],
+  ['leisure:beach_resort', 'beach_resort'],
+  ['leisure:swimming_area', 'swim_area'],
+  ['leisure:bathing_place', 'swim_area'],
+  ['leisure:water_park', 'water_park'],
+]
+
+interface PhotonFeature {
+  geometry?: { coordinates?: [number, number] }
+  properties?: {
+    osm_id?: number
+    osm_type?: string
+    osm_key?: string
+    osm_value?: string
+    name?: string
+  }
+}
+
+async function fetchFromPhoton(
+  lat: number,
+  lon: number,
+  radiusKm: number,
+  signal?: AbortSignal,
+): Promise<SwimSpot[]> {
+  const url = new URL('https://photon.komoot.io/reverse')
+  url.searchParams.set('lat', String(lat))
+  url.searchParams.set('lon', String(lon))
+  url.searchParams.set('radius', String(radiusKm))
+  url.searchParams.set('limit', '50')
+  // Only 'default', 'en', 'de' and 'fr' are supported; 'default' keeps the
+  // local OSM name, which is what people actually call the place.
+  url.searchParams.set('lang', 'default')
+  for (const [tag] of PHOTON_TAGS) url.searchParams.append('osm_tag', tag)
+
+  const timeout = AbortSignal.timeout(8000)
+  const res = await fetch(url, { signal: signal ? AbortSignal.any([signal, timeout]) : timeout })
+  if (!res.ok) throw new Error(`Photon HTTP ${res.status}`)
+  const data = (await res.json()) as { features?: PhotonFeature[] }
+
+  const byTag = new Map(PHOTON_TAGS)
+  const spots: SwimSpot[] = []
+
+  for (const f of data.features ?? []) {
+    const p = f.properties
+    const coords = f.geometry?.coordinates
+    if (!p || !coords) continue
+
+    const category = byTag.get(`${p.osm_key}:${p.osm_value}`)
+    if (!category || !p.name) continue
+
+    const [spotLon, spotLat] = coords
+    const distanceKm = haversineKm(lat, lon, spotLat, spotLon)
+    if (distanceKm > radiusKm) continue
+
+    // Same id shape as Overpass, so the two sources dedupe against each other.
+    const type = p.osm_type === 'W' ? 'way' : p.osm_type === 'R' ? 'relation' : 'node'
+    spots.push({
+      id: `${type}-${p.osm_id}`,
+      name: p.name,
+      category,
+      lat: spotLat,
+      lon: spotLon,
+      distanceKm,
+    })
+  }
+
+  return spots.sort((a, b) => a.distanceKm - b.distanceKm)
+}
+
+interface LoadOptions {
+  signal?: AbortSignal
+  /** Called with the fast preview if it arrives before the full list. */
+  onPreview?: (spots: SwimSpot[]) => void
+}
+
+/**
+ * Load swim spots: show Photon's answer within about a second, then replace it
+ * with the tag-verified Overpass list when that lands. If Overpass fails
+ * outright we keep the preview rather than showing nothing.
+ */
+export async function loadSwimSpots(
+  lat: number,
+  lon: number,
+  radiusKm: number,
+  { signal, onPreview }: LoadOptions = {},
+): Promise<SpotsResult> {
+  let overpassSettled = false
+
+  const overpass = fetchFromOverpass(lat, lon, radiusKm, signal).finally(() => {
+    overpassSettled = true
+  })
+  const photon = fetchFromPhoton(lat, lon, radiusKm, signal)
+
+  photon
+    .then((spots) => {
+      if (!overpassSettled && spots.length > 0 && !signal?.aborted) onPreview?.(spots)
+    })
+    .catch(() => {
+      /* the preview is a bonus; Overpass is the real answer */
+    })
+
+  try {
+    return await overpass
+  } catch (overpassError) {
+    const preview = await photon.catch(() => null)
+    if (preview && preview.length > 0) return { spots: preview, partial: true }
+    throw overpassError
   }
 }
 
@@ -248,4 +373,56 @@ function normalize(
 
 export function osmLink(spot: SwimSpot): string {
   return `https://www.openstreetmap.org/?mlat=${spot.lat}&mlon=${spot.lon}#map=16/${spot.lat}/${spot.lon}`
+}
+
+/* ---------------- local cache: instant list when coming back --------------- */
+
+const CACHE_PREFIX = 'beach-umbrella.spots.'
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000
+const CACHE_MAX_ENTRIES = 12
+
+function cacheKey(lat: number, lon: number, radiusKm: number): string {
+  // ~100 m granularity: revisiting the same place reuses the same entry.
+  return `${CACHE_PREFIX}${lat.toFixed(3)},${lon.toFixed(3)},${radiusKm}`
+}
+
+export function readCachedSpots(lat: number, lon: number, radiusKm: number): SwimSpot[] | null {
+  try {
+    const raw = localStorage.getItem(cacheKey(lat, lon, radiusKm))
+    if (!raw) return null
+    const entry = JSON.parse(raw) as { t: number; spots: SwimSpot[] }
+    if (!Array.isArray(entry.spots) || Date.now() - entry.t > CACHE_TTL_MS) return null
+    return entry.spots
+  } catch {
+    return null
+  }
+}
+
+export function writeCachedSpots(
+  lat: number,
+  lon: number,
+  radiusKm: number,
+  spots: SwimSpot[],
+): void {
+  try {
+    localStorage.setItem(cacheKey(lat, lon, radiusKm), JSON.stringify({ t: Date.now(), spots }))
+
+    // Keep only the most recent entries so storage cannot grow without bound.
+    const entries: Array<[string, number]> = []
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (!key?.startsWith(CACHE_PREFIX)) continue
+      try {
+        entries.push([key, (JSON.parse(localStorage.getItem(key) ?? '{}') as { t?: number }).t ?? 0])
+      } catch {
+        entries.push([key, 0])
+      }
+    }
+    entries
+      .sort((a, b) => b[1] - a[1])
+      .slice(CACHE_MAX_ENTRIES)
+      .forEach(([key]) => localStorage.removeItem(key))
+  } catch {
+    /* private mode or quota exceeded — the cache is optional */
+  }
 }
