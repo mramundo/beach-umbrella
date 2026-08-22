@@ -1,6 +1,10 @@
 import { haversineKm } from './geo'
 import type { SpotCategory, SwimSpot } from './types'
 
+/**
+ * Public Overpass instances. They rate-limit per IP and answer 429/503 when
+ * busy, so we try them in a rotating order and fall through on failure.
+ */
 const ENDPOINTS = [
   'https://overpass-api.de/api/interpreter',
   'https://lz4.overpass-api.de/api/interpreter',
@@ -22,40 +26,70 @@ interface OverpassElement {
 
 interface OverpassResponse {
   elements?: OverpassElement[]
-  /** Overpass reports runtime errors (e.g. timeouts) here with HTTP 200 */
+  /** Overpass reports runtime errors (timeouts) here alongside HTTP 200 */
   remark?: string
 }
 
 /**
- * Two separate queries so one heavy clause can't starve the rest:
- * a cheap "coastal & leisure" query, and an "inland water" query over the
- * huge natural=water category (equality filters only — regexes on that
- * category are what made the original single query time out server-side).
- * Explicitly excludes places tagged no-swimming or private; pools and
- * lakes must be named (unnamed ones are mostly backyard pools and noise).
+ * A bounding box around a point, as Overpass wants it: south,west,north,east.
+ *
+ * We query by bbox rather than `around` on purpose: `around` bypasses the
+ * spatial index and made these queries time out server-side. The bbox is a
+ * square, so results are re-filtered to the exact radius client-side.
  */
-function coastalQuery(around: string): string {
-  return `[out:json][timeout:25];
-(
-  nwr["natural"="beach"]["swimming"!="no"]["access"!="private"]${around};
-  nwr["natural"="bay"]["name"]${around};
-  nwr["leisure"="swimming_area"]["access"!="private"]${around};
-  nwr["leisure"="bathing_place"]${around};
-  nwr["leisure"="beach_resort"]${around};
-  nwr["leisure"="water_park"]${around};
-  nwr["leisure"="swimming_pool"]["name"]["access"!="private"]["access"!="customers"]${around};
-);
-out center qt 120;`
+function bboxAround(lat: number, lon: number, radiusKm: number): string {
+  const dLat = radiusKm / 111.32
+  // cos(lat) → 0 near the poles, so clamp the longitude span.
+  const cos = Math.cos((lat * Math.PI) / 180)
+  const dLon = Math.min(180, radiusKm / (111.32 * Math.max(0.01, cos)))
+  const south = Math.max(-90, lat - dLat)
+  const north = Math.min(90, lat + dLat)
+  const west = Math.max(-180, lon - dLon)
+  const east = Math.min(180, lon + dLon)
+  return `${south.toFixed(4)},${west.toFixed(4)},${north.toFixed(4)},${east.toFixed(4)}`
 }
 
-function lakesQuery(around: string): string {
-  return `[out:json][timeout:25];
+/**
+ * Coastal and built swimming places. Tag exclusions (private access, explicit
+ * no-swimming) are applied client-side in `isSwimmable`: negated filters are
+ * expensive server-side, and we receive the tags anyway.
+ *
+ * No numeric `out` limit: Overpass emits nodes before ways, so any limit
+ * silently truncates the ways — which is where most beaches live.
+ */
+function coastalQuery(bbox: string): string {
+  return `[out:json][timeout:30][bbox:${bbox}];
 (
-  wr["natural"="water"]["water"="lake"]["name"]["swimming"!="no"]["access"!="private"]${around};
-  wr["natural"="water"]["water"="lagoon"]["name"]["swimming"!="no"]${around};
-  wr["natural"="water"]["water"="quarry"]["name"]["swimming"!="no"]${around};
+  nwr["natural"="beach"];
+  nwr["natural"="bay"]["name"];
+  nwr["leisure"="swimming_area"];
+  nwr["leisure"="bathing_place"];
+  nwr["leisure"="beach_resort"];
+  nwr["leisure"="water_park"];
+  nwr["leisure"="swimming_pool"]["name"];
 );
-out center qt 60;`
+out center qt;`
+}
+
+/** Inland water: lakes, lagoons and flooded quarries (named ones only). */
+function inlandQuery(bbox: string): string {
+  return `[out:json][timeout:30][bbox:${bbox}];
+(
+  wr["natural"="water"]["water"="lake"]["name"];
+  wr["natural"="water"]["water"="lagoon"]["name"];
+  wr["natural"="water"]["water"="quarry"]["name"];
+);
+out center qt;`
+}
+
+/** Tags that mean "you cannot (or should not) swim here". */
+const BLOCKED_ACCESS = new Set(['private', 'no', 'permit', 'customers', 'members'])
+
+function isSwimmable(tags: Record<string, string>): boolean {
+  if (tags.swimming === 'no' || tags.swimming === 'private') return false
+  if (tags.access && BLOCKED_ACCESS.has(tags.access)) return false
+  if (tags.bathing === 'no') return false
+  return true
 }
 
 function categorize(tags: Record<string, string>): SpotCategory | null {
@@ -99,23 +133,25 @@ export const CATEGORY_COLOR: Record<SpotCategory, string> = {
 }
 
 async function runQuery(query: string, signal?: AbortSignal): Promise<OverpassElement[]> {
+  // Rotate the starting endpoint so we spread load instead of always
+  // hammering (and getting throttled by) the same instance.
+  const offset = Math.floor(Math.random() * ENDPOINTS.length)
   let lastError: unknown = null
-  for (const endpoint of ENDPOINTS) {
-    // Per-endpoint timeout so one hung instance doesn't stall the whole list.
-    const timeout = AbortSignal.timeout(32_000)
+
+  for (let i = 0; i < ENDPOINTS.length; i++) {
+    const endpoint = ENDPOINTS[(offset + i) % ENDPOINTS.length]
+    const timeout = AbortSignal.timeout(35_000)
     const combined = signal ? AbortSignal.any([signal, timeout]) : timeout
     try {
       // GET keeps responses cacheable by the service worker.
-      const url = `${endpoint}?data=${encodeURIComponent(query)}`
-      const res = await fetch(url, { signal: combined })
+      const res = await fetch(`${endpoint}?data=${encodeURIComponent(query)}`, { signal: combined })
       if (!res.ok) throw new Error(`Overpass HTTP ${res.status}`)
       const data = (await res.json()) as OverpassResponse
-      const elements = data.elements ?? []
-      // Overpass signals timeouts/errors via `remark` while returning 200.
-      if (elements.length === 0 && data.remark && /error|timed out/i.test(data.remark)) {
+      // Overpass signals query timeouts via `remark` while returning HTTP 200.
+      if (data.remark && /error|timed out/i.test(data.remark)) {
         throw new Error(`Overpass remark: ${data.remark}`)
       }
-      return elements
+      return data.elements ?? []
     } catch (err) {
       if (signal?.aborted) throw err
       lastError = err
@@ -126,7 +162,7 @@ async function runQuery(query: string, signal?: AbortSignal): Promise<OverpassEl
 
 export interface SpotsResult {
   spots: SwimSpot[]
-  /** true when the inland-water query failed and only coastal spots are shown */
+  /** true when one of the two queries failed and the list may be incomplete */
   partial: boolean
 }
 
@@ -136,32 +172,40 @@ export async function fetchSwimSpots(
   radiusKm: number,
   signal?: AbortSignal,
 ): Promise<SpotsResult> {
-  const around = `(around:${Math.round(radiusKm * 1000)},${lat.toFixed(5)},${lon.toFixed(5)})`
+  const bbox = bboxAround(lat, lon, radiusKm)
 
-  const [coastal, lakes] = await Promise.allSettled([
-    runQuery(coastalQuery(around), signal),
-    runQuery(lakesQuery(around), signal),
+  const [coastal, inland] = await Promise.allSettled([
+    runQuery(coastalQuery(bbox), signal),
+    runQuery(inlandQuery(bbox), signal),
   ])
 
-  if (coastal.status === 'rejected' && lakes.status === 'rejected') {
+  if (coastal.status === 'rejected' && inland.status === 'rejected') {
     throw coastal.reason
   }
 
   const elements = [
     ...(coastal.status === 'fulfilled' ? coastal.value : []),
-    ...(lakes.status === 'fulfilled' ? lakes.value : []),
+    ...(inland.status === 'fulfilled' ? inland.value : []),
   ]
+
   return {
-    spots: normalize(elements, lat, lon),
-    partial: coastal.status === 'rejected' || lakes.status === 'rejected',
+    spots: normalize(elements, lat, lon, radiusKm),
+    partial: coastal.status === 'rejected' || inland.status === 'rejected',
   }
 }
 
-function normalize(elements: OverpassElement[], lat: number, lon: number): SwimSpot[] {
+function normalize(
+  elements: OverpassElement[],
+  lat: number,
+  lon: number,
+  radiusKm: number,
+): SwimSpot[] {
   const spots: SwimSpot[] = []
 
   for (const el of elements) {
     const tags = el.tags ?? {}
+    if (!isSwimmable(tags)) continue
+
     const category = categorize(tags)
     if (!category) continue
 
@@ -169,13 +213,17 @@ function normalize(elements: OverpassElement[], lat: number, lon: number): SwimS
     const elLon = el.lon ?? el.center?.lon
     if (elLat == null || elLon == null) continue
 
+    // The bbox is a square: trim its corners back to the requested radius.
+    const distanceKm = haversineKm(lat, lon, elLat, elLon)
+    if (distanceKm > radiusKm) continue
+
     spots.push({
       id: `${el.type}-${el.id}`,
       name: tags.name ?? null,
       category,
       lat: elLat,
       lon: elLon,
-      distanceKm: haversineKm(lat, lon, elLat, elLon),
+      distanceKm,
     })
   }
 
@@ -192,7 +240,7 @@ function normalize(elements: OverpassElement[], lat: number, lon: number): SwimS
     if (!dup) kept.push(spot)
   }
 
-  // Unnamed spots are useful (beaches!) but noisy — keep a reasonable amount.
+  // Unnamed spots are useful (free beaches!) but noisy — keep a few.
   const named = kept.filter((s) => s.name)
   const unnamed = kept.filter((s) => !s.name).slice(0, 15)
   return [...named, ...unnamed].sort((a, b) => a.distanceKm - b.distanceKm).slice(0, 80)
