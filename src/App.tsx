@@ -3,6 +3,7 @@ import { I18nContext, detectLang, getSavedLang, saveLang, translate } from './li
 import type { Lang, Place } from './lib/types'
 import { Header } from './components/Header'
 import { Hero } from './components/Hero'
+import { Marquee } from './components/Marquee'
 import { Dashboard } from './components/Dashboard'
 import { Faq } from './components/Faq'
 import { Footer } from './components/Footer'
@@ -73,6 +74,7 @@ export default function App() {
         <Header />
         <main className="flex-1">
           <Hero place={place} onSelect={setPlace} />
+          <Marquee />
           {place && <Dashboard key={place.id} place={place} onSelectPlace={setPlace} />}
           <WaveDivider />
           <Faq />

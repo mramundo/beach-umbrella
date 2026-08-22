@@ -56,7 +56,8 @@ export default defineConfig({
           },
           {
             // Swim spots (OpenStreetMap Overpass API)
-            urlPattern: /^https:\/\/(overpass-api\.de|overpass\.kumi\.systems)\/.*/i,
+            urlPattern:
+              /^https:\/\/(overpass-api\.de|lz4\.overpass-api\.de|overpass\.private\.coffee|overpass\.kumi\.systems)\/.*/i,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'overpass',

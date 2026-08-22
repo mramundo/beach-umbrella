@@ -33,8 +33,10 @@ export function HourlyChart({ hours, nowIso }: Props) {
     <div>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div>
-          <h3 className="font-display text-xl font-extrabold">{t('chart.title')}</h3>
-          <p className="text-sm font-semibold text-ink-soft">{t('chart.subtitle')}</p>
+          <h3 className="squiggle inline-block font-display text-2xl font-extrabold">
+            {t('chart.title')}
+          </h3>
+          <p className="mt-1.5 text-sm font-bold text-ink-soft">{t('chart.subtitle')}</p>
         </div>
         <button
           type="button"
@@ -96,7 +98,7 @@ export function HourlyChart({ hours, nowIso }: Props) {
                     <span aria-hidden="true" className="mb-1 text-xs opacity-50 sm:text-base">🌙</span>
                   ) : (
                     <div
-                      className="animate-bar w-full rounded-t-md border-[2.5px] border-ink group-focus-visible:ring-[3px] group-focus-visible:ring-sea-400"
+                      className="animate-bar w-full rounded-t-lg border-[3px] border-ink group-focus-visible:ring-[3px] group-focus-visible:ring-sea-400"
                       style={{
                         height: `${Math.max(5, score)}%`,
                         backgroundColor: rampColor(score),

@@ -20,21 +20,25 @@ export function LocationCard({ place, timezone }: Props) {
   }, [])
 
   return (
-    <div className="card animate-rise flex flex-col justify-between gap-4 bg-sea-50 p-5 sm:flex-row sm:items-center">
+    <div className="card animate-rise flex flex-col justify-between gap-5 bg-gradient-to-r from-sea-50 to-sand-50 p-5 sm:flex-row sm:items-center sm:p-6">
       <div>
-        <h2 className="font-display text-3xl font-extrabold tracking-tight">
+        <h2 className="font-display text-4xl font-extrabold tracking-tight">
           {flagEmoji(place.countryCode)} {place.name}
         </h2>
-        <p className="mt-1 font-semibold text-ink-soft">
+        <p className="mt-1.5 text-lg font-bold text-ink-soft">
           {[place.admin, place.country].filter(Boolean).join(', ')}
         </p>
       </div>
-      <div className="sm:text-right">
-        <p className="text-sm font-bold text-ink-soft uppercase">{t('place.localTime')}</p>
-        <p className="font-display text-4xl font-extrabold tabular-nums" aria-live="off">
-          {clockIn(timezone, lang)}
-        </p>
-        <p className="font-semibold text-ink-soft">
+      <div className="flex flex-col items-start sm:items-end">
+        <div className="sticker rotate-1 bg-sun-300 px-5 py-2.5">
+          <p className="text-[11px] font-extrabold tracking-widest uppercase">
+            🕐 {t('place.localTime')}
+          </p>
+          <p className="font-display text-4xl leading-tight font-extrabold tabular-nums sm:text-5xl" aria-live="off">
+            {clockIn(timezone, lang)}
+          </p>
+        </div>
+        <p className="mt-2.5 font-semibold text-ink-soft">
           {dateStringIn(timezone, lang)} · {timezone.replace(/_/g, ' ')}
         </p>
       </div>

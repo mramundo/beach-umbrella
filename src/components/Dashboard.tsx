@@ -86,7 +86,7 @@ export function Dashboard({ place, onSelectPlace }: Props) {
   const { weather } = state
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 pb-10 sm:px-6">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-7 px-4 pt-8 pb-12 sm:px-6">
       <LocationCard place={place} timezone={weather.timezone} />
       <NowCard now={nowScored} hasMarine={weather.hasMarine} />
       {nowIso && <DaySection weather={weather} scored={scored} nowIso={nowIso} />}

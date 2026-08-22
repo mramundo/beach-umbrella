@@ -36,14 +36,22 @@ export function Footer() {
   })
 
   return (
-    <footer className="bg-ink py-8 text-center text-sand-100">
-      <div className="mx-auto max-w-4xl space-y-2 px-4 sm:px-6">
-        <p className="font-display text-xl font-bold">
-          ⛱️ Beach Umbrella
-        </p>
-        <p className="font-semibold">{t('footer.made')}</p>
+    <footer className="bg-ink py-10 text-center text-sand-100">
+      <div className="mx-auto flex max-w-4xl flex-col items-center gap-3 px-4 sm:px-6">
+        <div className="flex items-center gap-3">
+          <img
+            src={`${import.meta.env.BASE_URL}logo.svg`}
+            alt=""
+            aria-hidden="true"
+            className="h-14 w-14 rounded-2xl border-[3px] border-sand-100/40 bg-sand-50 p-1"
+          />
+          <p className="font-display text-2xl font-extrabold">
+            Beach <span className="text-coral-400">Umbrella</span>
+          </p>
+        </div>
+        <p className="text-base font-bold">{t('footer.made')}</p>
         <p className="text-sm font-semibold text-sand-100/80">{parts}</p>
-        <p className="text-xs font-semibold text-sand-100/60">{t('footer.disclaimer')}</p>
+        <p className="max-w-xl text-xs font-semibold text-sand-100/60">{t('footer.disclaimer')}</p>
       </div>
     </footer>
   )

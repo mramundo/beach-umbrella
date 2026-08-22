@@ -176,7 +176,9 @@ export function findSwimWindows(dayHours: ScoredHour[]): SwimWindow[] {
   if (scored.length === 0) return []
 
   const max = Math.max(...scored.map((s) => s.score as number))
-  const threshold = Math.max(45, Math.min(65, max - 8))
+  // Cap at 72 so a brilliant morning/evening doesn't drag high-UV midday
+  // hours into the same "best window" on sunny days.
+  const threshold = Math.max(45, Math.min(72, max - 8))
   if (max < 45) return []
 
   const windows: SwimWindow[] = []

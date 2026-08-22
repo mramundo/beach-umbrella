@@ -7,6 +7,11 @@ type Dict = Record<string, string>
 
 const en: Dict = {
   'app.tagline': 'Love the sea, not the sun?',
+  'app.tagline.pre': 'Love the',
+  'app.tagline.sea': 'sea',
+  'app.tagline.mid': ', not the',
+  'app.tagline.sun': 'sun',
+  'marquee': '☀️ Less UV · 🌊 Calm sea · ⛱️ Zero sunburn · 🏖️ Happy dips · 🕶️ Golden hour swims',
   'app.subtitle':
     'Beach Umbrella finds the best low-sun time windows for your swim — anywhere with water.',
   'app.description':
@@ -69,7 +74,9 @@ const en: Dict = {
     'Beaches, coves, pools, lakes and other swimmable places around {place}, from OpenStreetMap.',
   'spots.loading': 'Scanning the map for swimmable water…',
   'spots.empty': 'No swimmable spots found within {km} km.',
-  'spots.error': 'Could not load nearby spots right now. Please try again in a minute.',
+  'spots.error':
+    'The OpenStreetMap servers are busy right now and did not answer. Please try again in a minute.',
+  'spots.partial': 'Some map sources did not answer — the list may be incomplete.',
   'spots.expand': 'Search wider ({km} km)',
   'spots.showMore': 'Show more spots',
   'spots.checkHere': 'Conditions here',
@@ -146,6 +153,11 @@ const en: Dict = {
 
 const it: Dict = {
   'app.tagline': 'Ami il mare, ma non il sole?',
+  'app.tagline.pre': 'Ami il',
+  'app.tagline.sea': 'mare',
+  'app.tagline.mid': ', ma non il',
+  'app.tagline.sun': 'sole',
+  'marquee': '☀️ Meno UV · 🌊 Mare calmo · ⛱️ Zero scottature · 🏖️ Bagni felici · 🕶️ Tuffi alla golden hour',
   'app.subtitle':
     'Beach Umbrella trova le fasce orarie con poco sole per il tuo bagno — ovunque ci sia acqua.',
   'app.description':
@@ -209,7 +221,9 @@ const it: Dict = {
     'Spiagge, calette, piscine, laghi e altri luoghi balneabili attorno a {place}, da OpenStreetMap.',
   'spots.loading': 'Cerco acqua balneabile sulla mappa…',
   'spots.empty': 'Nessun luogo balneabile trovato entro {km} km.',
-  'spots.error': 'Impossibile caricare i luoghi vicini in questo momento. Riprova tra un minuto.',
+  'spots.error':
+    'I server di OpenStreetMap sono occupati e non hanno risposto. Riprova tra un minuto.',
+  'spots.partial': 'Alcune fonti della mappa non hanno risposto — l’elenco potrebbe essere incompleto.',
   'spots.expand': 'Allarga la ricerca ({km} km)',
   'spots.showMore': 'Mostra altri luoghi',
   'spots.checkHere': 'Condizioni qui',
