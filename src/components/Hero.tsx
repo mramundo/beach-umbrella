@@ -20,9 +20,11 @@ export function Hero({ place, onSelect }: Props) {
       {/* Floating summer scenery (decorative) */}
       {expanded && (
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-          <SunBurst className="absolute -top-16 -right-14 h-44 w-44 sm:-top-14 sm:-right-4 sm:h-80 sm:w-80" />
-          <Cloud className="animate-cloud absolute top-16 -left-56 w-36 opacity-90" />
-          <Cloud className="animate-cloud-slow absolute top-44 -left-56 w-24 opacity-70" />
+          {/* Whole sun, sized per breakpoint to the free sky beside the logo and above the title */}
+          <SunBurst className="absolute top-2 right-2 size-[min(25vw,7rem)] sm:top-3 sm:right-4 sm:size-48 md:size-56 lg:top-2 lg:right-6 lg:size-64 2xl:right-8 2xl:size-80" />
+          {/* Phones: one small cloud in a high lane, so none drifts through the title */}
+          <Cloud className="animate-cloud absolute top-1 left-0 w-24 opacity-90 sm:top-16 sm:w-36" />
+          <Cloud className="animate-cloud-slow absolute top-44 left-0 hidden w-24 opacity-70 sm:block" />
           <BeachBall className="animate-float-slow absolute bottom-24 left-3 h-14 w-14 sm:left-10 sm:h-20 sm:w-20" />
           <span className="animate-float absolute right-4 bottom-16 hidden text-5xl sm:block" style={{ animationDelay: '-2s' }}>
             🦩
@@ -132,7 +134,8 @@ function SunBurst({ className }: { className?: string }) {
 
 function Cloud({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 120 60" className={className}>
+    // The outline's top bumps reach y≈0; the viewBox starts above them so the stroke is never sliced.
+    <svg viewBox="0 -4 120 60" className={className}>
       <path
         d="M20 48 A 16 16 0 0 1 26 18 A 20 20 0 0 1 64 12 A 16 16 0 0 1 96 22 A 14 14 0 0 1 98 48 Z"
         fill="#fff"

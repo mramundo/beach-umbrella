@@ -14,8 +14,9 @@
   </g>
   <circle cx="430" cy="88" r="40" fill="#ffc531" stroke="#0b3b5c" stroke-width="10"/>
 
-  <!-- sand dune -->
-  <path d="M -8 452 Q 90 414 200 440 T 420 442 T 524 436 L 524 520 L -8 520 Z"
+  <!-- sand dune: runs far past the frame, so icons that shrink the logo into a
+       safe zone (maskable) still show sand from edge to edge -->
+  <path d="M -216 470 Q -106 490 -8 452 Q 90 414 200 440 T 420 442 Q 488.48 427.06 512 428.4 T 640 452 L 640 640 L -216 640 Z"
         fill="#f8d99a" stroke="#0b3b5c" stroke-width="9"/>
 
   <!-- sun lounger -->

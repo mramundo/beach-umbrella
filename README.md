@@ -85,7 +85,7 @@ npm install
 npm run dev        # dev server
 npm run build      # typecheck + production build to dist/
 npm run preview    # serve the production build
-npm run icons      # regenerate PWA icons from public/logo.svg
+npm run icons      # regenerate PWA icons (public/logo.svg) and favicon.ico (public/favicon.svg)
 ```
 
 ## 📦 Deploy (GitHub Pages)

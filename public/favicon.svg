@@ -1,13 +1,41 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 420">
-  <g transform="translate(210 190) rotate(-14)">
-    <rect x="-8" y="-155" width="16" height="330" rx="8" fill="#0b3b5c"/>
-    <g stroke="#0b3b5c" stroke-width="11" stroke-linejoin="round">
-      <path d="M 0 -150 Q -82 -95 -150 0 A 30 24 0 0 0 -90 0 Q -49 -95 0 -150 Z" fill="#ff5d5d"/>
-      <path d="M 0 -150 Q -49 -95 -90 0 A 30 24 0 0 0 -30 0 Q -16 -95 0 -150 Z" fill="#fff4dd"/>
-      <path d="M 0 -150 Q -16 -95 -30 0 A 30 24 0 0 0 30 0 Q 16 -95 0 -150 Z" fill="#ff5d5d"/>
-      <path d="M 0 -150 Q 16 -95 30 0 A 30 24 0 0 0 90 0 Q 49 -95 0 -150 Z" fill="#fff4dd"/>
-      <path d="M 0 -150 Q 49 -95 90 0 A 30 24 0 0 0 150 0 Q 82 -95 0 -150 Z" fill="#ff5d5d"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Beach Umbrella favicon: the logo's parasol and sun on its sand, on the app icons'
+       sky tile, with strokes heavy enough to stay readable at 16px -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#cff3f9"/>
+      <stop offset="1" stop-color="#fff4dd"/>
+    </linearGradient>
+    <clipPath id="tile">
+      <rect width="512" height="512" rx="112"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#tile)">
+    <rect width="512" height="512" fill="url(#sky)"/>
+
+    <!-- sun -->
+    <circle cx="390" cy="118" r="54" fill="#ffc531" stroke="#0b3b5c" stroke-width="24"/>
+
+    <!-- umbrella: logo.svg's petals and tilt -->
+    <g transform="translate(222 292) rotate(-14) scale(1.13)">
+      <rect x="-10.5" y="-150" width="21" height="260" rx="10.5" fill="#0b3b5c"/>
+      <path d="M 0 -150 Q -82 -95 -150 0 A 30 24 0 0 0 -90 0 Q -49 -95 0 -150 Z
+               M 0 -150 Q -16 -95 -30 0 A 30 24 0 0 0 30 0 Q 16 -95 0 -150 Z
+               M 0 -150 Q 49 -95 90 0 A 30 24 0 0 0 150 0 Q 82 -95 0 -150 Z" fill="#ff5d5d"/>
+      <path d="M 0 -150 Q -49 -95 -90 0 A 30 24 0 0 0 -30 0 Q -16 -95 0 -150 Z
+               M 0 -150 Q 16 -95 30 0 A 30 24 0 0 0 90 0 Q 49 -95 0 -150 Z" fill="#fff4dd"/>
+      <!-- thin ribs inside a bold silhouette keep the stripes apart at tab size -->
+      <path d="M 0 -150 Q -49 -95 -90 0 M 0 -150 Q -16 -95 -30 0 M 0 -150 Q 16 -95 30 0 M 0 -150 Q 49 -95 90 0"
+            fill="none" stroke="#0b3b5c" stroke-width="12" stroke-linecap="round"/>
+      <path d="M 0 -150 Q -82 -95 -150 0 A 30 24 0 0 0 -90 0 A 30 24 0 0 0 -30 0 A 30 24 0 0 0 30 0
+               A 30 24 0 0 0 90 0 A 30 24 0 0 0 150 0 Q 82 -95 0 -150 Z"
+            fill="none" stroke="#0b3b5c" stroke-width="21" stroke-linejoin="round"/>
+      <circle cx="0" cy="-152" r="19" fill="#ffc531" stroke="#0b3b5c" stroke-width="17"/>
     </g>
-    <circle cx="0" cy="-152" r="14" fill="#ffc531" stroke="#0b3b5c" stroke-width="9"/>
+
+    <!-- sand -->
+    <path d="M -20 412 Q 96 362 240 400 T 540 394 L 540 540 L -20 540 Z"
+          fill="#f8d99a" stroke="#0b3b5c" stroke-width="24"/>
   </g>
 </svg>

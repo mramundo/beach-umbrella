@@ -245,16 +245,20 @@ body {
   animation: float-slow 7s ease-in-out infinite;
 }
 
+/* Each crossing starts just past the left edge and ends just past the right one,
+   whatever the screen width, so a cloud never vanishes mid-sky. */
 @keyframes cloud-across {
   from {
-    transform: translateX(-220px);
+    transform: translateX(-100%);
   }
   to {
-    transform: translateX(1700px);
+    transform: translateX(100vw);
   }
 }
+/* Negative delays: the sky already has clouds when the page opens. */
 .animate-cloud {
   animation: cloud-across 48s linear infinite;
+  animation-delay: -14s;
 }
 .animate-cloud-slow {
   animation: cloud-across 75s linear infinite;
@@ -318,6 +322,11 @@ body {
   }
   .hover-pop:hover {
     transform: none;
+  }
+  /* A cloud that cannot drift would sit parked on the left edge. */
+  .animate-cloud,
+  .animate-cloud-slow {
+    display: none;
   }
   html {
     scroll-behavior: auto;

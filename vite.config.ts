@@ -13,7 +13,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'logo.svg', 'apple-touch-icon.png', 'robots.txt'],
+      includeAssets: ['favicon.ico', 'favicon.svg', 'logo.svg', 'apple-touch-icon.png', 'robots.txt'],
       manifest: {
         name: 'Beach Umbrella',
         short_name: 'BeachUmbrella',
