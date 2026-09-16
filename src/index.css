@@ -43,6 +43,7 @@
   --color-sand-200: #ffe9c2;
   --color-sand-300: #f8d99a;
 
+  --shadow-pop-xs: 3px 3px 0 0 var(--color-ink);
   --shadow-pop: 7px 7px 0 0 var(--color-ink);
   --shadow-pop-sm: 4px 4px 0 0 var(--color-ink);
   --shadow-pop-lg: 11px 11px 0 0 var(--color-ink);
@@ -126,7 +127,7 @@ body {
 }
 
 .chip {
-  border: 2.5px solid var(--color-ink);
+  border: 3px solid var(--color-ink);
   border-radius: 9999px;
   box-shadow: var(--shadow-pop-sm);
   font-weight: 700;
@@ -295,7 +296,7 @@ body {
 }
 .hover-pop:hover {
   transform: translate(-2px, -3px) rotate(-0.4deg);
-  box-shadow: 10px 11px 0 0 var(--color-ink);
+  box-shadow: var(--shadow-pop-lg);
 }
 
 @media (prefers-reduced-motion: reduce) {

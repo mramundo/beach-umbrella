@@ -23,20 +23,24 @@ export function Gauge({ value, color, label }: Props) {
   return (
     <div className="flex flex-col items-center">
       <svg viewBox="0 0 200 116" className="w-52 sm:w-60" role="img" aria-label={`${label}: ${value ?? '—'}/100`}>
-        <path
-          d={`M 20 100 A ${r} ${r} 0 0 1 180 100`}
-          fill="none"
-          stroke="var(--color-sand-200)"
-          strokeWidth="22"
-          strokeLinecap="round"
-        />
+        {/*
+          Drawn first and 6px wider, so the track and the value sit inside it:
+          that reads as the same crisp 3px ink outline every other element has.
+          It used to be a translucent ink arc on top, the one soft edge in the UI.
+        */}
         <path
           d={`M 20 100 A ${r} ${r} 0 0 1 180 100`}
           fill="none"
           stroke="var(--color-ink)"
           strokeWidth="28"
           strokeLinecap="round"
-          opacity="0.12"
+        />
+        <path
+          d={`M 20 100 A ${r} ${r} 0 0 1 180 100`}
+          fill="none"
+          stroke="var(--color-sand-200)"
+          strokeWidth="22"
+          strokeLinecap="round"
         />
         <path
           d={`M 20 100 A ${r} ${r} 0 0 1 180 100`}

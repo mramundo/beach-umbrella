@@ -24,7 +24,7 @@ export function Faq() {
               <summary className="flex cursor-pointer items-center gap-4 px-4 py-4 font-display text-lg font-bold select-none sm:px-5 [&::-webkit-details-marker]:hidden">
                 <span
                   aria-hidden="true"
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border-[3px] border-ink text-sm shadow-[2.5px_2.5px_0_0_var(--color-ink)] ${NUM_COLORS[i % NUM_COLORS.length]} ${i % 2 === 0 ? '-rotate-3' : 'rotate-3'}`}
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border-[3px] border-ink text-sm shadow-pop-xs ${NUM_COLORS[i % NUM_COLORS.length]} ${i % 2 === 0 ? '-rotate-3' : 'rotate-3'}`}
                 >
                   {String(n).padStart(2, '0')}
                 </span>

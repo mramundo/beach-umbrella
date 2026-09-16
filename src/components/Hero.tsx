@@ -37,7 +37,7 @@ export function Hero({ place, onSelect }: Props) {
               src={`${import.meta.env.BASE_URL}logo.svg`}
               alt=""
               aria-hidden="true"
-              className="animate-float mb-5 h-36 w-36 drop-shadow-[6px_8px_0_rgba(11,59,92,0.15)] sm:h-48 sm:w-48"
+              className="animate-float mb-5 h-36 w-36 sm:h-48 sm:w-48"
             />
           )}
 
@@ -50,7 +50,7 @@ export function Hero({ place, onSelect }: Props) {
                 <WaveUnderline className="absolute -bottom-1 left-0 w-full text-sea-300" />
               </span>
               {t('app.tagline.mid')}{' '}
-              <span className="relative inline-block -rotate-2 rounded-xl border-[3px] border-ink bg-sun-300 px-2 shadow-[4px_4px_0_0_var(--color-ink)]">
+              <span className="relative inline-block -rotate-2 rounded-xl border-[3px] border-ink bg-sun-300 px-2 shadow-pop-sm">
                 {t('app.tagline.sun')}
               </span>
               <span className="ml-1.5">?</span>

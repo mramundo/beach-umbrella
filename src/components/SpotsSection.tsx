@@ -198,7 +198,7 @@ export function SpotsSection({ place, onSelectPlace }: Props) {
                 <div className="flex items-start gap-3">
                   <span
                     aria-hidden="true"
-                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border-[3px] border-ink text-2xl shadow-[3px_3px_0_0_var(--color-ink)]"
+                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border-[3px] border-ink text-2xl shadow-pop-xs"
                     style={{ backgroundColor: CATEGORY_COLOR[s.category] }}
                   >
                     {CATEGORY_EMOJI[s.category]}
@@ -278,8 +278,8 @@ function SpotsSkeleton({ label }: { label: string }) {
               </div>
             </div>
             <div className="mt-4 flex gap-2">
-              <div className="h-8 w-28 rounded-full border-[2.5px] border-ink bg-sand-100" />
-              <div className="h-8 w-20 rounded-full border-[2.5px] border-ink bg-sand-100" />
+              <div className="h-8 w-28 rounded-full border-[3px] border-ink bg-sand-100" />
+              <div className="h-8 w-20 rounded-full border-[3px] border-ink bg-sand-100" />
             </div>
           </li>
         ))}

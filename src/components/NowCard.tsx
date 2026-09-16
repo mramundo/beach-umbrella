@@ -12,9 +12,9 @@ interface Props {
 
 const STAT_EMOJI: Record<string, string> = {
   air: '🌡️',
-  water: '🌊',
+  water: '💧',
   uv: '☀️',
-  waves: '〰️',
+  waves: '🌊',
   wind: '💨',
   rain: '🌦️',
 }
@@ -70,7 +70,7 @@ export function NowCard({ now, hasMarine }: Props) {
         {stats.map((s) => (
           <div
             key={s.key}
-            className="hover-wiggle rounded-2xl border-[3px] border-ink bg-sand-50 px-3 py-3 shadow-[3px_3px_0_0_var(--color-ink)]"
+            className="hover-wiggle rounded-2xl border-[3px] border-ink bg-sand-50 px-3 py-3 shadow-pop-xs"
           >
             <p className="flex items-center gap-1.5 text-xs font-extrabold tracking-wide text-ink-soft uppercase">
               <span aria-hidden="true" className="text-base">

@@ -119,17 +119,24 @@ export const CATEGORY_EMOJI: Record<SpotCategory, string> = {
   quarry: '💎',
 }
 
-/** Accent colors per category for the spot cards (badge backgrounds). */
+/**
+ * Badge tint per category. The nine categories fall into three families, and a
+ * tint belongs to exactly one family, so the colour means something instead of
+ * repeating at random; the emoji beside it carries the precise category.
+ */
 export const CATEGORY_COLOR: Record<SpotCategory, string> = {
+  // open coast and sea
   beach: 'var(--color-sun-300)',
-  cove: 'var(--color-sea-200)',
-  swim_area: 'var(--color-sea-100)',
-  beach_resort: 'var(--color-coral-100)',
-  pool: 'var(--color-sea-100)',
-  water_park: 'var(--color-coral-100)',
-  lake: 'var(--color-sea-200)',
-  lagoon: 'var(--color-coral-100)',
-  quarry: 'var(--color-sand-200)',
+  cove: 'var(--color-sun-300)',
+  lagoon: 'var(--color-sun-300)',
+  // supervised or built bathing places
+  swim_area: 'var(--color-sea-200)',
+  beach_resort: 'var(--color-sea-200)',
+  pool: 'var(--color-sea-200)',
+  water_park: 'var(--color-sea-200)',
+  // inland fresh water
+  lake: 'var(--color-coral-100)',
+  quarry: 'var(--color-coral-100)',
 }
 
 async function runQuery(query: string, signal?: AbortSignal): Promise<OverpassElement[]> {

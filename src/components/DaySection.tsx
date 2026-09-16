@@ -91,7 +91,7 @@ export function DaySection({ weather, scored, nowIso }: Props) {
                 <span className="tabular-nums">
                   {hourLabel(w.start)} – {hourLabel(w.end)}
                 </span>
-                <span className="rounded-full border-[2.5px] border-ink bg-sea-50 px-2 py-0.5 font-sans text-xs font-extrabold">
+                <span className="rounded-full border-[3px] border-ink bg-sea-50 px-2 py-0.5 font-sans text-xs font-extrabold">
                   {w.avgScore} {t('windows.avg')}
                 </span>
               </li>

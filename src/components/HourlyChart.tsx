@@ -14,6 +14,9 @@ interface Props {
 const FIRST_HOUR = 6
 const LAST_HOUR = 21
 
+/** Shared by the plot, the baseline and the hour labels so the columns line up. */
+const COL_GAP = 'gap-1 sm:gap-1.5'
+
 /** Hour-by-hour Dip Index bars (06–21) with tooltip, direct peak label and a table view. */
 export function HourlyChart({ hours, nowIso }: Props) {
   const { t } = useI18n()
@@ -27,6 +30,8 @@ export function HourlyChart({ hours, nowIso }: Props) {
   if (visible.length === 0) return null
 
   const nowHourPrefix = nowIso ? nowIso.slice(0, 13) : null
+  const isNowHour = (s: ScoredHour) =>
+    nowHourPrefix != null && s.hour.time.startsWith(nowHourPrefix)
   const maxScore = Math.max(0, ...visible.map((s) => s.score ?? 0))
 
   return (
@@ -76,46 +81,78 @@ export function HourlyChart({ hours, nowIso }: Props) {
         </div>
       ) : (
         <div className="relative mt-4" onMouseLeave={() => setHovered(null)}>
-          <div className="flex h-44 items-end gap-1 sm:gap-1.5" role="img" aria-label={t('chart.title')}>
+          {/*
+            The plot holds nothing but the bars, so a bar's height is always the
+            score and nothing else. The peak label is positioned over its bar
+            (pt-6 reserves the room): as a flex sibling it used to squeeze the
+            bar, drawing the day's best hour shorter than lower ones.
+          */}
+          <div className={`flex h-44 items-end pt-6 ${COL_GAP}`} role="img" aria-label={t('chart.title')}>
             {visible.map((s, i) => {
               const score = s.score
-              const isNow = nowHourPrefix != null && s.hour.time.startsWith(nowHourPrefix)
               const isPeak = score != null && score === maxScore && maxScore > 0
+              const barHeight = score == null ? 0 : Math.max(5, score)
               return (
                 <button
                   key={s.hour.time}
                   type="button"
-                  className="group relative flex h-full flex-1 cursor-pointer flex-col items-center justify-end outline-none"
+                  className="group relative flex h-full flex-1 cursor-pointer items-end outline-none"
                   onMouseEnter={() => setHovered(i)}
                   onFocus={() => setHovered(i)}
                   onBlur={() => setHovered(null)}
                   aria-label={`${hourLabel(s.hour.time)} — ${t('chart.colIndex')} ${score ?? '—'} — ${t(`band.${s.band}`)}`}
                 >
                   {isPeak && (
-                    <span className="mb-1 font-display text-xs font-extrabold sm:text-sm">{score}</span>
+                    <span
+                      className="pointer-events-none absolute inset-x-0 text-center font-display text-xs font-extrabold sm:text-sm"
+                      style={{ bottom: `calc(${barHeight}% + 5px)` }}
+                    >
+                      {score}
+                    </span>
                   )}
                   {score == null ? (
-                    <span aria-hidden="true" className="mb-1 text-xs opacity-50 sm:text-base">🌙</span>
+                    <span aria-hidden="true" className="w-full pb-1 text-center text-xs opacity-50 sm:text-base">
+                      🌙
+                    </span>
                   ) : (
                     <div
-                      className="animate-bar w-full rounded-t-lg border-[3px] border-ink group-focus-visible:ring-[3px] group-focus-visible:ring-sea-400"
+                      className="animate-bar w-full shrink-0 rounded-t-lg border-[3px] border-b-0 border-ink group-focus-visible:ring-[3px] group-focus-visible:ring-sea-400"
                       style={{
-                        height: `${Math.max(5, score)}%`,
+                        height: `${barHeight}%`,
                         backgroundColor: rampColor(score),
                         animationDelay: `${i * 28}ms`,
-                        borderBottomWidth: 0,
                       }}
                     />
                   )}
-                  <div className={`h-1.5 w-full ${isNow ? 'bg-coral-500' : 'bg-ink'}`} />
-                  <span
-                    className={`mt-1 text-[10px] font-bold tabular-nums sm:text-xs ${
-                      isNow ? 'text-coral-600' : 'text-ink-soft'
-                    } ${hourOf(s.hour.time) % 3 === 0 || isNow ? '' : 'invisible sm:visible'}`}
-                  >
-                    {isNow ? t('chart.now') : `${hourOf(s.hour.time)}`}
-                  </span>
                 </button>
+              )
+            })}
+          </div>
+
+          {/* One unbroken axis: per-column segments left a gap under every bar. */}
+          <div className="relative h-1.5 w-full bg-ink">
+            <div className={`absolute inset-0 flex ${COL_GAP}`}>
+              {visible.map((s) => (
+                <div
+                  key={s.hour.time}
+                  className={`flex-1 ${isNowHour(s) ? 'bg-coral-500' : ''}`}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className={`mt-1 flex ${COL_GAP}`}>
+            {visible.map((s) => {
+              const isNow = isNowHour(s)
+              return (
+                <span
+                  key={s.hour.time}
+                  className={`flex-1 text-center text-[10px] font-bold tabular-nums sm:text-xs ${
+                    isNow ? 'text-coral-600' : 'text-ink-soft'
+                  } ${hourOf(s.hour.time) % 3 === 0 || isNow ? '' : 'invisible sm:visible'}`}
+                >
+                  {isNow ? t('chart.now') : `${hourOf(s.hour.time)}`}
+                </span>
               )
             })}
           </div>
@@ -161,7 +198,7 @@ function Tooltip({ scored, index, total }: { scored: ScoredHour; index: number; 
         <span>{scored.score ?? '—'}/100</span>
       </p>
       <p
-        className="mt-1 inline-block rounded-full border-2 border-ink px-2 py-0.5 text-xs font-bold"
+        className="mt-1 inline-block rounded-full border-[3px] border-ink px-2 py-0.5 text-xs font-bold"
         style={{ backgroundColor: band.bg, color: band.fg }}
       >
         {band.emoji} {t(`band.${scored.band}`)}
